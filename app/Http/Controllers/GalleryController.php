@@ -13,9 +13,9 @@ class GalleryController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        $galleries = Gallery::with('produit')->get();
+        $galleries = Gallery::where('produit_id', $request->produit_id)->get();
         return response()->json([
             'status' => 'success',
             'data' => $galleries

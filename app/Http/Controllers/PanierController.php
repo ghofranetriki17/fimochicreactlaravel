@@ -16,12 +16,12 @@ class PanierController extends Controller
      */
     public function index()
     {
-        if (!Auth::check()) {
+        /*if (!Auth::check()) {
             return response()->json(['message' => 'Vous devez vous connecter pour voir votre panier.'], 401);
         }
     
-        $clientId = Auth::user()->client->id;
-    
+        $clientId = Auth::user()->client->id;*/
+    $clientId=2;
         $cart = Panier::where('client_id', $clientId)->with('produit')->get();
     
         $total = $cart->sum(function ($item) {
@@ -53,12 +53,13 @@ class PanierController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Auth::check()) {
+        /*if (!Auth::check()) {
             return response()->json(['message' => 'Vous devez vous connecter pour ajouter des produits au panier.'], 401);
         }
 
-        $clientId = Auth::user()->client->id;
-    
+        $clientId = Auth::user()->client->id;*/
+        $clientId=2;
+
         $request->validate([
             'produit_id' => 'required|exists:produits,id',
             'quantite' => 'required|integer|min:1',
@@ -80,9 +81,9 @@ class PanierController extends Controller
      */
     public function update(Request $request, Panier $panier)
     {
-        if (!Auth::check()) {
+        /*if (!Auth::check()) {
             return response()->json(['message' => 'Vous devez vous connecter pour mettre à jour votre panier.'], 401);
-        }
+        }*/
 
         $request->validate([
             'action' => 'required|string|in:increment,decrement',
@@ -104,11 +105,12 @@ class PanierController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        if (!Auth::check()) {
+        /*if (!Auth::check()) {
             return response()->json(['message' => 'Vous devez vous connecter pour gérer votre panier.'], 401);
         }
     
-        $clientId = Auth::user()->client->id;
+        $clientId = Auth::user()->client->id;*/    $clientId=2;
+
     
         $panierItem = Panier::where('client_id', $clientId)->where('id', $id)->first();
     

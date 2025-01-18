@@ -16,7 +16,7 @@ class CommandeController extends Controller
     public function index()
     {
         // Vérifiez si l'utilisateur est connecté
-        if (!Auth::check()) {
+        /*if (!Auth::check()) {
             return response()->json(['message' => 'Vous devez vous connecter pour voir vos commandes.'], 401);
         }
 
@@ -27,11 +27,13 @@ class CommandeController extends Controller
         if ($user->type == 1) { // Remplacez 'is_admin' par la condition ou le champ qui indique si l'utilisateur est un admin
             // Récupérez toutes les commandes pour les administrateurs
             $commandes = Commande::with('lignesCommande')->get();
-        } else {
+        } else {*/
             // Récupérez les commandes du client connecté pour les clients
-            $clientId = $user->client->id;
+            #$clientId = $user->client->id;
+            $clientId =2;
+
             $commandes = Commande::where('client_id', $clientId)->with('lignesCommande')->get();
-        }
+       # }
 
         // Retourner les données sous forme de JSON
         return response()->json($commandes);
@@ -40,11 +42,12 @@ class CommandeController extends Controller
     // Méthode pour créer une nouvelle commande
     public function store(Request $request)
     {
-        if (!Auth::check()) {
+        /*if (!Auth::check()) {
             return response()->json(['message' => 'Vous devez vous connecter pour passer une commande.'], 401);
         }
-
-        $clientId = Auth::user()->client->id;
+*/
+       # $clientId = Auth::user()->client->id;
+       $clientId=2;
         $panier = Panier::where('client_id', $clientId)->get();
 
         if ($panier->isEmpty()) {

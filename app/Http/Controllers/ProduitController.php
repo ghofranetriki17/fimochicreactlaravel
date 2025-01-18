@@ -161,4 +161,20 @@ class ProduitController extends Controller
 
         return response()->json($products, 200);
     }
+    public function filterByAttributAndValeur(Request $request)
+{
+    $attributId = $request->input('attributId');
+    $valeurId = $request->input('valeurId');
+    
+    // Obtenez les produits filtrés par l'attribut et la valeur
+    $produits = Produit::whereHas('valeurs', function($query) use ($attributId, $valeurId) {
+        $query->where('attribut_id', $attributId)
+              ->where('valeur_id', $valeurId);
+    })->get();
+
+    return response()->json([
+        'produits' => $produits
+    ]);
+}
+
 }

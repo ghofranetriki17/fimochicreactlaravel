@@ -106,4 +106,12 @@ class ValeurController extends Controller
             'attribut' => $attribut
         ]);
     }
+    public function showValuesForAttribut($id)
+    {
+        // Récupérer l'attribut avec ses valeurs associées
+        $attribut = Attribut::with('valeurs')->findOrFail($id);
+        
+        // Retourner les valeurs sous forme de JSON
+        return response()->json(['valeurs' => $attribut->valeurs]);
+    }
 }

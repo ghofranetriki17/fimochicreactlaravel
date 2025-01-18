@@ -7,7 +7,8 @@ use App\Http\Controllers\{
     ProduitValeurController, ValeurController, AttributController, RessourceController,
     GalleryController, PanierController, PromotionController, CommandeController, 
     RessourcePersonnalisationController, CommandePersonnaliseeController, 
-    ProductLikeCommentController, ContactController, PromoCodeController, ParametreController
+    ProductLikeCommentController, ContactController, PromoCodeController, ParametreController,
+    BoutiqueController // Assurez-vous que BoutiqueController est bien importé
 };
 
 // Routes API pour les produits, clients, etc.
@@ -27,6 +28,8 @@ Route::middleware('api')->group(function () {
     Route::resource('valeurs', ValeurController::class);
     Route::resource('produitvaleur', ProduitValeurController::class);
     Route::resource('attributs', AttributController::class);
+    Route::get('attributs/{id}/valeurs', [ValeurController::class, 'showValuesForAttribut']);
+
     Route::resource('ressources', RessourceController::class);
     Route::resource('galleries', GalleryController::class);
     Route::resource('panier', PanierController::class);
@@ -34,8 +37,13 @@ Route::middleware('api')->group(function () {
     Route::resource('commandes', CommandeController::class);
     Route::resource('ressources_personnalisation', RessourcePersonnalisationController::class);
     Route::resource('commandespersoonalisse', CommandePersonnaliseeController::class);
-   // Route::resource('product_like_comments', ProductLikeCommentController::class);
+    // Route::resource('product_like_comments', ProductLikeCommentController::class);
     Route::resource('contact', ContactController::class);
     Route::resource('promo_codes', PromoCodeController::class);
     Route::resource('parametres', ParametreController::class);
+
+    // Route pour la boutique
+    Route::get('/boutique', [BoutiqueController::class, 'index']);
+    Route::get('/produits/filtrer', [ProduitController::class, 'filterByAttributAndValeur']);
+
 });
