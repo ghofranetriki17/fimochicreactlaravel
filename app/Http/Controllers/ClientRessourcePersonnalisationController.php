@@ -2,187 +2,83 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\RessourcePersonnalisation;
-use App\Models\Panier;
 use App\Models\ClientRessourcePersonnalisation;
+use Illuminate\Http\Request;
 
 class ClientRessourcePersonnalisationController extends Controller
 {
-    /**
-     * Récupère les ressources de personnalisation regroupées par type pour les boucles.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function indexBoucles()
+    // Display a listing of the resource
+    public function index()
     {
-        $ressourcesParType = RessourcePersonnalisation::where('cat', 'boucles')->get()->groupBy('type');
-        return response()->json([
-            'status' => 'success',
-            'data' => $ressourcesParType
-        ], 200);
+        // Fetch all resources for client_id 2
+        $clientRessources = ClientRessourcePersonnalisation::where('client_id', 2)->get();
+        return response()->json($clientRessources);
     }
 
-    /**
-     * Récupère les ressources de personnalisation regroupées par type pour les cadeaux, avec le panier du client.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function indexCadeau()
+    // Show the form for creating a new resource
+    public function create()
     {
-        if (!Auth::check()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Vous devez être connecté pour personnaliser.'
-            ], 401);
-        }
-
-        $ressourcesParType = RessourcePersonnalisation::where('cat', 'cadeau')->get()->groupBy('type');
-
-        $clientId = Auth::user()->client->id;
-        $cart = Panier::where('client_id', $clientId)
-            ->with(['produit.galleries' => function($query) {
-                $query->where('type', 'sans');
-            }])
-            ->get();
-
-        return response()->json([
-            'status' => 'success',
-            'data' => [
-                'ressources' => $ressourcesParType,
-                'cart' => $cart
-            ]
-        ], 200);
+        // This can be expanded to return a view for creating the resource
+        return response()->json(['message' => 'Create resource for client_id 2']);
     }
 
-    /**
-     * Enregistre les personnalisations du client et renvoie une réponse JSON.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
+    // Store a newly created resource in storage
     public function store(Request $request)
     {
-        $request->validate([
-            'ressources_json' => 'required|json',
+        // Ensure client_id is always 2
+        $validatedData = $request->validate([
+            'ressource_personnalisation_id' => 'required|integer',
+            'quantite' => 'required|integer',
+            'prix_total' => 'required|numeric',
         ]);
 
-        if (!Auth::check()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Vous devez être connecté pour personnaliser.'
-            ], 401);
-        }
+        $validatedData['client_id'] = 2;
 
-        $clientId = Auth::user()->client->id;
-        $ressourcesData = json_decode($request->input('ressources_json'), true);
+        $clientRessource = ClientRessourcePersonnalisation::create($validatedData);
 
-        foreach ($ressourcesData as $data) {
-            ClientRessourcePersonnalisation::create([
-                'client_id' => $clientId,
-                'ressource_personnalisation_id' => $data['id'],
-                'quantite' => $data['quantity'],
-                'prix_total' => $data['quantity'] * RessourcePersonnalisation::find($data['id'])->prix,
-            ]);
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Personnalisation enregistrée avec succès.'
-        ], 201);
+        return response()->json($clientRessource, 201);
     }
 
-    /**
-     * Récupère et regroupe les personnalisations des clients pour le dashboard.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function indexDashboard()
+    // Display the specified resource
+    public function show($id)
     {
-        $personnalisations = ClientRessourcePersonnalisation::with(['client', 'ressourcePersonnalisation'])
-            ->orderBy('created_at')
-            ->get()
-            ->groupBy(['client_id', function ($item) {
-                return $item->created_at->format('Y-m-d H:i:s'); 
-            }]);
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $personnalisations
-        ], 200);
+        // Fetch resource by ID for client_id 2
+        $clientRessource = ClientRessourcePersonnalisation::where('client_id', 2)->findOrFail($id);
+        return response()->json($clientRessource);
     }
 
-    /**
-     * Met à jour la quantité d'une personnalisation.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function updateQuantity(Request $request, $id)
+    // Show the form for editing the specified resource
+    public function edit($id)
     {
-        $clientRessourcePersonnalisation = ClientRessourcePersonnalisation::findOrFail($id);
-        $quantite = $request->input('quantite');
-        $clientRessourcePersonnalisation->quantite = $quantite;
-        $clientRessourcePersonnalisation->prix_total = $clientRessourcePersonnalisation->ressourcePersonnalisation->prix * $quantite;
-        $clientRessourcePersonnalisation->save();
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Quantité mise à jour avec succès.',
-            'data' => $clientRessourcePersonnalisation
-        ], 200);
+        // Similar to create, but for editing existing records
+        return response()->json(['message' => 'Edit resource for client_id 2']);
     }
 
-    /**
-     * Supprime toutes les personnalisations par date.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  string  $date
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function deleteAllByDate(Request $request, $date)
+    // Update the specified resource in storage
+    public function update(Request $request, $id)
     {
-        $date = date('Y-m-d', strtotime($date));
+        // Ensure client_id is always 2
+        $validatedData = $request->validate([
+            'ressource_personnalisation_id' => 'required|integer',
+            'quantite' => 'required|integer',
+            'prix_total' => 'required|numeric',
+        ]);
 
-        ClientRessourcePersonnalisation::whereDate('created_at', $date)->delete();
+        $validatedData['client_id'] = 2;
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Toutes les personnalisations de cette date ont été supprimées.'
-        ], 200);
+        $clientRessource = ClientRessourcePersonnalisation::where('client_id', 2)->findOrFail($id);
+        $clientRessource->update($validatedData);
+
+        return response()->json($clientRessource);
     }
 
-    /**
-     * Récupère toutes les personnalisations d'un client.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function show()
-    {
-        $clientId = Auth::user()->client->id;
-        $personnalisations = ClientRessourcePersonnalisation::where('client_id', $clientId)->get();
-        return response()->json([
-            'status' => 'success',
-            'data' => $personnalisations
-        ], 200);
-    }
-
-    /**
-     * Supprime une personnalisation spécifique.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
-     */
+    // Remove the specified resource from storage
     public function destroy($id)
     {
-        $clientRessourcePersonnalisation = ClientRessourcePersonnalisation::findOrFail($id);
-        $clientRessourcePersonnalisation->delete();
+        // Delete the resource for client_id 2
+        $clientRessource = ClientRessourcePersonnalisation::where('client_id', 2)->findOrFail($id);
+        $clientRessource->delete();
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Personnalisation supprimée avec succès.'
-        ], 200);
+        return response()->json(['message' => 'Resource deleted']);
     }
 }

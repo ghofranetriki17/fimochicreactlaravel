@@ -37,10 +37,15 @@ Route::middleware('api')->group(function () {
     Route::resource('commandes', CommandeController::class);
     Route::resource('ressources_personnalisation', RessourcePersonnalisationController::class);
     Route::resource('commandespersoonalisse', CommandePersonnaliseeController::class);
-    // Route::resource('product_like_comments', ProductLikeCommentController::class);
-    Route::resource('contact', ContactController::class);
-    Route::resource('promo_codes', PromoCodeController::class);
+    Route::resource('product_like_comments', ProductLikeCommentController::class);
+
+    Route::resource('contacts', ContactController::class);
+    Route::get('contacts/unread', [ContactController::class, 'getUnreadContacts']);
+    Route::post('contacts/{contact}/mark-as-read', [ContactController::class, 'markAsRead']);    Route::resource('promo_codes', PromoCodeController::class);
     Route::resource('parametres', ParametreController::class);
+    // Add the route for deleting the value associated with the product
+Route::delete('produits/{produit}/valeurs/{valeur}', [ProduitValeurController::class, 'detach']);
+
 
     // Route pour la boutique
     Route::get('/boutique', [BoutiqueController::class, 'index']);

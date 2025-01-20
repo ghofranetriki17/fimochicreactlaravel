@@ -84,7 +84,7 @@ class ProduitValeurController extends Controller
     {
         // Dissocier la valeur du produit (sans supprimer la valeur elle-même)
         $produit->valeurs()->detach($valeur->id);
-
+    
         // Retourner une réponse JSON de succès
         return response()->json([
             'success' => 'Valeur dissociée avec succès du produit',
@@ -92,4 +92,5 @@ class ProduitValeurController extends Controller
             'valeur_id' => $valeur->id
         ]);
     }
+    
 }

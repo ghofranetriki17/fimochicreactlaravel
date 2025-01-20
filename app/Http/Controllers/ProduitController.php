@@ -52,10 +52,9 @@ class ProduitController extends Controller
             'type' => 'nullable|string|max:255',
             'date_ajout' => 'nullable|date',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'attribute_values' => 'required|array',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ]);
-
+    
         if ($request->hasFile('image')) {
             $photo = $request->file('image');
             $photoName = time() . '.' . $photo->getClientOriginalExtension();
@@ -63,7 +62,7 @@ class ProduitController extends Controller
         } else {
             $photoName = null;
         }
-
+    
         $produit = new Produit();
         $produit->name = $request->name;
         $produit->prix = $request->prix;
@@ -73,14 +72,11 @@ class ProduitController extends Controller
         $produit->description = $request->description;
         $produit->image = $photoName;
         $produit->save();
-
-        foreach ($request->attribute_values as $attribut_id => $valeur_ids) {
-            foreach ($valeur_ids as $valeur_id) {
-                $produit->valeurs()->attach($valeur_id);
-            }
-        }
-
-        return response()->json(['message' => 'Produit créé avec succès.', 'produit' => $produit], 201);
+    
+        return response()->json([
+            'message' => 'Produit créé avec succès.', 
+            'produit' => $produit
+        ], 201);
     }
 
     /**
@@ -113,12 +109,12 @@ class ProduitController extends Controller
             'type' => 'nullable|string|max:255',
             'date_ajout' => 'nullable|date',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'attribute_values' => 'nullable|array', // Handle attribute values if passed
         ]);
-
+    
         $produit = Produit::findOrFail($id);
-
         $produit->fill($request->only(['name', 'qte_dispo', 'prix', 'description', 'type', 'date_ajout']));
-
+    
         if ($request->hasFile('image')) {
             if ($produit->image) {
                 \File::delete(public_path('img/' . $produit->image));
@@ -128,9 +124,14 @@ class ProduitController extends Controller
             $photo->move(public_path('img'), $photoName);
             $produit->image = $photoName;
         }
-
+    
         $produit->save();
-
+    
+        // Update the attribute values (if provided in the request)
+        if ($request->has('attribute_values')) {
+            $produit->valeurs()->sync($request->input('attribute_values'));
+        }
+    
         return response()->json(['message' => 'Produit mis à jour avec succès.', 'produit' => $produit], 200);
     }
 
